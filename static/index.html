@@ -4,13 +4,9 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>تتبع أيام العمل</title>
-
-  <!-- خطوط وأيقونات -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet"/>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet"/>
-
-  <!-- ملف الـCSS -->
-  <link rel="stylesheet" href="/static/style.css" />
+  <link rel="stylesheet" href="/static/style.css"/>
 </head>
 <body>
 
@@ -24,6 +20,7 @@
       <p class="header__subtitle">
         راقب ساعات عملك بسهولة، وحصّل راتبك بدقة.
       </p>
+      <a href="/logout" class="btn outline small">تسجيل خروج</a>
     </div>
   </header>
 
@@ -68,7 +65,7 @@
     <div class="calendar__days" id="calendar"></div>
   </main>
 
-  <!-- MODAL: ساعات / حالات اليوم -->
+  <!-- POPUP Day Modal -->
   <div id="popup" class="modal hidden">
     <div class="modal-backdrop"></div>
     <div class="modal-panel">
@@ -114,7 +111,7 @@
     </div>
   </div>
 
-  <!-- MODAL: إدخال مبالغ -->
+  <!-- Input Modal -->
   <div id="input-modal" class="modal hidden">
     <div class="modal-backdrop"></div>
     <div class="modal-panel">
@@ -134,7 +131,7 @@
     </div>
   </div>
 
-  <!-- MODAL: إشعارات -->
+  <!-- Notify Modal -->
   <div id="notify-modal" class="modal hidden">
     <div class="modal-backdrop"></div>
     <div class="modal-panel">
@@ -147,8 +144,6 @@
     </div>
   </div>
 
-  <!-- السكريبت -->
   <script src="/static/script.js" defer></script>
-
 </body>
 </html>

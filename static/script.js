@@ -1,6 +1,6 @@
 // script.js
 
-// DOM references
+// ——— تعاريف عناصر DOM ———
 const calendarEl     = document.getElementById("calendar");
 const monthYearEl    = document.getElementById("month-year");
 const prevBtn        = document.getElementById("prev-month");
@@ -44,32 +44,36 @@ const inputCancel    = document.getElementById("input-cancel");
 const notifyMsg      = document.getElementById("notify-message");
 const notifyOk       = document.getElementById("notify-ok");
 
+// حالة التطبيق
 let currentDate  = new Date();
 let daysData     = [];
 let selectedDate = null;
 const hourlyRate = 20;
 
-// API helpers
-async function apiGet(path){
-  return (await fetch(`http://127.0.0.1:5000${path}`)).json();
+// ——— دوال الـ API (نسبية إلى نفس الدومين) ———
+async function apiGet(path) {
+  const res = await fetch(path, { credentials: 'same-origin' });
+  return res.json();
 }
-async function apiPost(path, body){
-  return (await fetch(`http://127.0.0.1:5000${path}`, {
+async function apiPost(path, body) {
+  const res = await fetch(path, {
     method: 'POST',
-    headers: {'Content-Type':'application/json'},
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'same-origin',
     body: JSON.stringify(body)
-  })).json();
+  });
+  return res.json();
 }
 
-// Show notification
-function showNotification(msg){
+// ——— إشعار بسيط ———
+function showNotification(msg) {
   notifyMsg.textContent = msg;
   notifyModal.classList.remove("hidden");
   notifyOk.onclick = () => notifyModal.classList.add("hidden");
 }
 
-// Input prompt
-function showInputPrompt(title, callback){
+// ——— طلب قيمة من المستخدم ———
+function showInputPrompt(title, callback) {
   inputTitle.textContent = title;
   inputValue.value = "";
   inputModal.classList.remove("hidden");
@@ -85,15 +89,15 @@ function showInputPrompt(title, callback){
   inputCancel.onclick = () => inputModal.classList.add("hidden");
 }
 
-// Load wallet data
-async function loadWallet(){
+// ——— تحميل بيانات المحفظة ———
+async function loadWallet() {
   const w = await apiGet("/api/get-wallet");
   balanceEl.textContent = w.balance;
   window._salaryAdj = w.salary_adjustment;
 }
 
-// Modify wallet
-function modifyWallet(sign){
+// ——— تعديل رصيد المحفظة ———
+function modifyWallet(sign) {
   showInputPrompt("أدخل المبلغ:", async val => {
     await apiPost("/api/modify-wallet", { amount: sign * val });
     await loadWallet();
@@ -102,8 +106,8 @@ function modifyWallet(sign){
   });
 }
 
-// Modify salary adjustment
-function modifySalary(sign){
+// ——— تعديل التعديلات على الراتب ———
+function modifySalary(sign) {
   showInputPrompt("أدخل المبلغ:", async val => {
     await apiPost("/api/modify-salary", { amount: sign * val });
     await loadWallet();
@@ -112,7 +116,7 @@ function modifySalary(sign){
   });
 }
 
-// Receive salary
+// ——— استلام الراتب ———
 receiveBtn.onclick = async () => {
   const r = await apiPost("/api/receive-salary", {});
   await loadWallet();
@@ -120,20 +124,20 @@ receiveBtn.onclick = async () => {
   showNotification(`استلمت ${r.received} ش.ج`);
 };
 
-// Bind summary actions
+// ربط أزرار الملخص
 addBalBtn.onclick = () => modifyWallet(+1);
 subBalBtn.onclick = () => modifyWallet(-1);
 addSalBtn.onclick = () => modifySalary(+1);
 subSalBtn.onclick = () => modifySalary(-1);
 
-// Load days from server
-async function loadDays(){
+// ——— تحميل الأيام من السيرفر ———
+async function loadDays() {
   daysData = await apiGet("/api/get-days");
   renderCalendar();
 }
 
-// Render calendar
-function renderCalendar(){
+// ——— عرض التقويم ———
+function renderCalendar() {
   const Y     = currentDate.getFullYear(),
         M     = currentDate.getMonth(),
         first = new Date(Y, M, 1).getDay(),
@@ -143,26 +147,24 @@ function renderCalendar(){
     .toLocaleDateString("ar", { month:"long", year:"numeric" });
   calendarEl.innerHTML = "";
 
-  // Blank leading cells
+  // خلايا فارغة قبل أول يوم
   for(let i=0;i<first;i++){
     const empty = document.createElement("div");
     empty.className = "day";
     calendarEl.appendChild(empty);
   }
 
-  // Compute salary sum
+  // حساب الراتب المحسوب
   let sumDone = 0;
-  daysData.forEach(d => {
-    if (d.status === "done") sumDone += d.salary;
-  });
+  daysData.forEach(d => { if (d.status==="done") sumDone += d.salary; });
   salaryEl.textContent = sumDone + (window._salaryAdj||0);
 
-  // Today string
+  // تعريف اليوم الحالي
   const today = new Date();
   const todayStr =
     `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
 
-  // Render each day
+  // رسم الأيام
   for(let d=1; d<=dim; d++){
     const ds  = `${Y}-${String(M+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
     const rec = daysData.find(x => x.date===ds) || {};
@@ -170,32 +172,31 @@ function renderCalendar(){
     const wrapper = document.createElement("div");
     wrapper.className = "day";
 
-    // Highlight today with wrapper class
-    if (ds === todayStr) {
-      wrapper.classList.add("today");
-    }
+    // تمييز اليوم الحالي
+    if (ds === todayStr) wrapper.classList.add("today");
 
     const btn = document.createElement("button");
     btn.textContent  = d;
     btn.dataset.date = ds;
 
-    // Apply status color (overrides nothing)
+    // تطبيق لون الحالة
     if (rec.status && rec.status!=="none") {
-      switch(rec.status){
-        case "paid":    btn.classList.add("paid");    break;
-        case "done":    btn.classList.add("worked");  break;
-        case "absent":  btn.classList.add("absent");  break;
-        case "pending": btn.classList.add("pending"); break;
-      }
+      btn.classList.add({
+        paid:    "paid",
+        done:    "worked",
+        absent:  "absent",
+        pending: "pending"
+      }[rec.status]);
     }
 
+    // عند الضغط على رقم اليوم
     btn.onclick = () => {
       selectedDate = ds;
       selectedDateEl.textContent = ds;
       dayNameEl.textContent = new Date(ds)
         .toLocaleDateString("ar", { weekday:"long" });
 
-      // Hours info
+      // عرض ساعات اليوم
       if (rec.start && rec.end) {
         dayInfoEl.textContent = `الساعات: ${rec.start} – ${rec.end}`;
       } else {
@@ -203,24 +204,21 @@ function renderCalendar(){
       }
 
       const st = rec.status || "none";
-      // Hide all controls
-      enterHoursBtn.hidden = true;
-      markDoneBtn.hidden   = true;
-      setAbsentBtn.hidden  = true;
-      cancelDoneBtn.hidden = true;
-      hoursForm.hidden     = true;
+      // إخفاء الكل أولًا
+      [enterHoursBtn, markDoneBtn, setAbsentBtn, cancelDoneBtn].forEach(b=>b.hidden=true);
+      hoursForm.hidden = true;
 
-      // Show based on status
-      if (st === "none") {
+      // إظهار حسب الحالة
+      if (st==="none") {
         enterHoursBtn.hidden = false;
-      } else if (st === "pending") {
+      } else if (st==="pending") {
         enterHoursBtn.hidden = false;
         markDoneBtn.hidden   = false;
         setAbsentBtn.hidden  = false;
-      } else if (st === "done") {
+      } else if (st==="done") {
         cancelDoneBtn.hidden = false;
       }
-      // absent/paid: no buttons
+      // absent/paid: لا أزرار
 
       popup.classList.remove("hidden");
     };
@@ -230,35 +228,30 @@ function renderCalendar(){
   }
 }
 
-// Navigation
-prevBtn.onclick   = () => { currentDate.setMonth(currentDate.getMonth()-1); renderCalendar(); };
-nextBtn.onclick   = () => { currentDate.setMonth(currentDate.getMonth()+1); renderCalendar(); };
+// ——— تنقل بين الشهور ———
+prevBtn.onclick   = () => { currentDate.setMonth(M=>M-1); renderCalendar(); };
+nextBtn.onclick   = () => { currentDate.setMonth(M=>M+1); renderCalendar(); };
 cancelBtn.onclick = () => popup.classList.add("hidden");
 
-// Show hours form
+// ——— إظهار نموذج ساعات ———
 enterHoursBtn.onclick = () => {
-  startHourInput.value = "";
-  startMinInput .value = "";
-  endHourInput  .value = "";
-  endMinInput   .value = "";
-  hoursForm.hidden     = false;
+  [startHourInput,startMinInput,endHourInput,endMinInput].forEach(i=>i.value="");
+  hoursForm.hidden = false;
 };
 
-// Save or clear hours
+// ——— حفظ أو مسح ساعات ———
 saveHoursBtn.onclick = async () => {
-  let shRaw = startHourInput.value.trim();
-  let smRaw = startMinInput .value.trim();
-  let ehRaw = endHourInput  .value.trim();
-  let emRaw = endMinInput   .value.trim();
+  let sh = startHourInput.value.trim(),
+      sm = startMinInput.value.trim(),
+      eh = endHourInput.value.trim(),
+      em = endMinInput.value.trim();
 
-  // Clear if all empty
-  if (!shRaw && !smRaw && !ehRaw && !emRaw) {
+  // إذا كلها فاضية → مسح
+  if (!sh&&!sm&&!eh&&!em) {
     await apiPost("/api/save-day", {
       date: selectedDate,
       status: "none",
-      start: "",
-      end: "",
-      salary: 0
+      start: "", end: "", salary: 0
     });
     popup.classList.add("hidden");
     loadDays();
@@ -266,100 +259,80 @@ saveHoursBtn.onclick = async () => {
     return;
   }
 
-  // Default missing parts to 0
-  if (shRaw && !smRaw) smRaw = "0";
-  if (ehRaw && !emRaw) emRaw = "0";
-  if (!shRaw && smRaw) shRaw = "0";
-  if (!ehRaw && emRaw) ehRaw = "0";
+  // إعطاء الصفر للقيم الفارغة
+  if (sh&& !sm) sm="0";
+  if (eh&& !em) em="0";
+  if (!sh&& sm) sh="0";
+  if (!eh&& em) eh="0";
 
-  const sh = parseInt(shRaw,10),
-        sm = parseInt(smRaw,10),
-        eh = parseInt(ehRaw,10),
-        em = parseInt(emRaw,10);
+  const [sH,sM,eH,eM] = [sh,sm,eh,em].map(v=>parseInt(v,10));
 
-  // Validate
-  if (
-    isNaN(sh)||isNaN(sm) ||
-    isNaN(eh)||isNaN(em)
-  ) {
-    showNotification("أكمل جميع الحقول بالساعة والدقيقة");
+  // تحقق من الصحة
+  if ([sH,sM,eH,eM].some(v=>isNaN(v)
+      || v<0 || (v>23&&(v===sH||v===eH)) || (v>59&&(v===sM||v===eM)))) {
+    showNotification("تأكد من الأرقام: ساعات 0–23، دقائق 0–59");
     return;
   }
-  if (
-    sh<0||sh>23||eh<0||eh>23||
-    sm<0||sm>59||em<0||em>59
-  ) {
-    showNotification("الوقت خارج المدى (00–23 للساعة، 00–59 للدقيقة)");
-    return;
-  }
-
-  const diff = (eh*60 + em) - (sh*60 + sm);
-  if (diff <= 0) {
+  const diff = (eH*60+eM)-(sH*60+sM);
+  if (diff<=0) {
     showNotification("الوقت غير منطقي");
     return;
   }
 
-  const startStr = String(sh).padStart(2,"0")+":"+String(sm).padStart(2,"0");
-  const endStr   = String(eh).padStart(2,"0")+":"+String(em).padStart(2,"0");
+  const startStr = `${String(sH).padStart(2,"0")}:${String(sM).padStart(2,"0")}`;
+  const endStr   = `${String(eH).padStart(2,"0")}:${String(eM).padStart(2,"0")}`;
   const sal      = parseFloat(((diff/60)*hourlyRate).toFixed(2));
 
   await apiPost("/api/save-day", {
     date: selectedDate,
-    start: startStr,
-    end: endStr,
-    salary: sal,
-    status: "pending"
+    start: startStr, end: endStr,
+    salary: sal, status: "pending"
   });
-
   popup.classList.add("hidden");
   loadDays();
   showNotification("تم حفظ الساعات (pending)");
 };
 
-// Mark absent
+// ——— تعيين غياب ———
 setAbsentBtn.onclick = async () => {
-  const rec = daysData.find(d => d.date === selectedDate) || {};
+  const rec = daysData.find(d=>d.date===selectedDate) || {};
   await apiPost("/api/save-day", {
     date: selectedDate,
     status: "absent",
-    start: rec.start || "",
-    end: rec.end   || "",
-    salary: rec.salary || 0
+    start: rec.start||"", end: rec.end||"", salary: rec.salary||0
   });
   popup.classList.add("hidden");
   loadDays();
   showNotification("تم تمييز اليوم كـ 'لم يتم العمل'");
 };
 
-// Mark done
+// ——— تأكيد العمل → من pending إلى done ———
 markDoneBtn.onclick = async () => {
-  const rec = daysData.find(d => d.date === selectedDate) || {};
+  const rec = daysData.find(d=>d.date===selectedDate) || {};
   await apiPost("/api/save-day", {
     date: selectedDate,
     status: "done",
-    salary: rec.salary || 0
+    salary: rec.salary||0
   });
   popup.classList.add("hidden");
   loadDays();
   showNotification("تم وضع اليوم كمكتمل");
 };
 
-// Cancel done → pending
+// ——— التراجع عن done → pending ———
 cancelDoneBtn.onclick = async () => {
-  const rec = daysData.find(d => d.date === selectedDate) || {};
+  const rec = daysData.find(d=>d.date===selectedDate) || {};
   await apiPost("/api/save-day", {
     date: selectedDate,
     status: "pending",
-    start: rec.start || "",
-    end: rec.end   || "",
-    salary: rec.salary || 0
+    start: rec.start||"", end: rec.end||"", salary: rec.salary||0
   });
   popup.classList.add("hidden");
   loadDays();
   showNotification("تم التراجع عن حالة 'مكتمل'");
 };
 
-// Initialize on page load
+// ——— تهيئة الصفحة عند الفتح ———
 window.addEventListener("DOMContentLoaded", () => {
   loadWallet();
   loadDays();

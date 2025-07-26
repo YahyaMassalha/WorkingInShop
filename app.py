@@ -2,14 +2,9 @@ import os
 from flask import Flask, request, jsonify
 from pymongo import MongoClient
 
-# تهيئة Flask لخدمة ملفات static/ على الجذر
-app = Flask(
-    __name__,
-    static_folder="static",
-    static_url_path="/static"
-)
+app = Flask(__name__)  # سيخدم مجلد static/ تلقائيّاً على /static/*
 
-# سلسلة الاتصال بقاعدة MongoDB (استخدم متغيّر بيئة في الإنتاج)
+# سلسلة الاتصال بقاعدة MongoDB
 MONGO_URI = os.environ.get("MONGO_URI", (
     "mongodb+srv://unknownmasalha1:FvehuNBd3L0DPA4U"
     "@cluster0.nekekvh.mongodb.net/work_tracker"
@@ -24,14 +19,16 @@ wallet_col = db["wallet"]
 if wallet_col.count_documents({"_id": "wallet"}) == 0:
     wallet_col.insert_one({"_id": "wallet", "balance": 0, "salary_adjustment": 0})
 
-# ───ـ خدمة الواجهة الأمامية ────#
+# =====================================================
+# خدمة الواجهة الأمامية — سيخدم Flask تلقائياً static/index.html
+# =====================================================
 @app.route("/")
 def index():
     return app.send_static_file("index.html")
 
-# ملاحظة: لا نحتاج catch‑all route لأن Flask يخدم /static/* تلقائياً
-
-# ─── مسارات الـ API ────#
+# =====================================================
+# مسارات الـ API
+# =====================================================
 @app.route("/api/get-days", methods=["GET"])
 def get_days():
     days = list(days_col.find({}, {"_id": 0}))
@@ -88,4 +85,6 @@ def receive_salary():
     return jsonify({"received": total}), 200
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)
+    # يستخدم PORT من متغيرات البيئة عند التشغيل على Render
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)

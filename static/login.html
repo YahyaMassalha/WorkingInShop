@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>تسجيل الدخول</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="login-container">
+    <form method="POST" action="/login" class="login-form">
+      <h2>تسجيل الدخول</h2>
+      <input type="email" name="email" placeholder="البريد الإلكتروني" required>
+      <input type="password" name="password" placeholder="كلمة المرور" required>
+      <button type="submit" class="btn filled primary w-full">دخول</button>
+      <p class="error">
+        <script>
+          if (location.search.includes("error=1")) {
+            document.write("بيانات خاطئة، حاول مرة أخرى");
+          }
+        </script>
+      </p>
+    </form>
+  </div>
+</body>
+</html>

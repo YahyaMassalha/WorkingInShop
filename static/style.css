@@ -343,3 +343,123 @@ body {
   gap: 1rem;
   margin-top: 1rem;
 }
+
+
+body.login-page {
+  background: var(--clr-bg);
+  font-family: 'Inter', sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  margin: 0;
+}
+
+.login-container {
+  background: var(--clr-white);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+  width: 90%;
+  max-width: 360px;
+  overflow: hidden;
+}
+
+.login-header {
+  background: linear-gradient(135deg, var(--clr-primary), var(--clr-accent));
+  color: var(--clr-white);
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.login-header h2 {
+  margin: 0;
+  font-size: var(--fs-lg);
+  font-weight: 600;
+}
+
+.login-form {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.login-form label {
+  font-size: var(--fs-sm);
+  color: var(--clr-dark);
+  text-align: right;
+}
+
+.login-form input[type="email"],
+.login-form input[type="password"] {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  font-size: var(--fs-md);
+  border: 1px solid #cbd5e0;
+  border-radius: var(--radius);
+}
+
+.login-form button {
+  font-size: var(--fs-md);
+  padding: 0.6rem;
+  border: none;
+  border-radius: var(--radius);
+  background: var(--clr-primary);
+  color: var(--clr-white);
+  cursor: pointer;
+  transition: background .2s, box-shadow .2s;
+}
+
+.login-form button:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.login-footer {
+  text-align: center;
+  padding: 0.75rem;
+  font-size: var(--fs-sm);
+  background: #f0f0f5;
+}
+
+.login-footer a {
+  color: var(--clr-accent);
+  text-decoration: none;
+}
+.login-container .contact-button{
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+padding: 0.6rem;
+  border: none;
+  border-radius: var(--radius);
+  background-color:#f6ad55  ;
+  cursor: pointer;
+  transition: background .2s, box-shadow .2s;
+  margin-top: 10px;
+  order: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  grid-column: span 2;
+}
+.contact-button > button{
+  background: none;
+  border: none;
+  font-weight: 700;
+  color: rgb(255, 255, 255);
+  font-size: var(--fs-md);
+  width: 100%;
+  cursor: pointer;
+}
+.register{
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  grid-template-columns: 1fr 1fr;
+  padding: 20px;
+  padding-bottom: 30px;
+}
+.contact-text{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  order: 0;
+  grid-column: span 2;
+}

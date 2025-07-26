@@ -1,1 +1,149 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>تتبع أيام العمل</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
 
+  <!-- HEADER -->
+  <header class="header">
+    <div class="container header__inner">
+      <h1 class="header__title">
+        <i class="bi bi-calendar-check-fill"></i>
+        تتبع أيام العمل
+      </h1>
+      <p class="header__subtitle">
+        راقب ساعات عملك بسهولة، وحصّل راتبك بدقة.
+      </p>
+    </div>
+  </header>
+
+  <!-- SUMMARY CARDS -->
+  <section class="summary container">
+    <div class="card">
+      <div class="card__icon"><i class="bi bi-wallet2"></i></div>
+      <div>
+        <h3 class="card__title">رصيد المحفظة</h3>
+        <p class="card__value"><span id="balance">0</span> ش.ج</p>
+        <div class="card__actions">
+          <button type="button" id="add-balance" class="btn outline">+ إضافة</button>
+          <button type="button" id="sub-balance" class="btn outline">– إزالة</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card__icon"><i class="bi bi-currency-dollar"></i></div>
+      <div>
+        <h3 class="card__title">الراتب الحالي</h3>
+        <p class="card__value"><span id="salary">0</span> ش.ج</p>
+        <div class="card__actions">
+          <button type="button" id="add-salary" class="btn filled accent">+ زيادة</button>
+          <button type="button" id="sub-salary" class="btn filled accent">– خصم</button>
+          <button type="button" id="receive-btn" class="btn filled primary">استلام</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CALENDAR -->
+  <main class="calendar container">
+    <div class="calendar__nav">
+      <button type="button" id="prev-month" class="icon-btn"><i class="bi bi-chevron-right"></i></button>
+      <h2 id="month-year" class="calendar__month"></h2>
+      <button type="button" id="next-month" class="icon-btn"><i class="bi bi-chevron-left"></i></button>
+    </div>
+    <div class="calendar__weekdays">
+      <div>أحد</div><div>اثنين</div><div>ثلاثاء</div>
+      <div>أربعاء</div><div>خميس</div><div>جمعة</div><div>سبت</div>
+    </div>
+    <div class="calendar__days" id="calendar"></div>
+  </main>
+
+  <!-- MODAL: ساعات / حالات اليوم -->
+  <div id="popup" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-panel">
+      <header class="modal-header">
+        <h3 class="modal-title">
+          <i class="bi bi-info-circle"></i>
+          <span id="selected-date"></span> (<span id="day-name"></span>)
+        </h3>
+        <button type="button" id="cancel-btn" class="btn icon-only"><i class="bi bi-x-lg"></i></button>
+      </header>
+      <div class="modal-body">
+        <p id="day-info" class="modal__info">لم يتم تسجيل ساعات بعد</p>
+        <div class="modal-actions">
+          <button type="button" id="enter-hours-btn" class="btn filled accent">🕒 تسجيل/إلغاء</button>
+          <button type="button" id="mark-done-btn" class="btn filled success hidden">✅ تم العمل</button>
+          <button type="button" id="set-absent-btn" class="btn filled red hidden">لم يتم العمل</button>
+          <button type="button" id="cancel-done-btn" class="btn outline danger hidden">↩️ إلغاء العمل</button>
+        </div>
+        <form id="hours-form" class="modal__form hidden">
+          <div class="hours-row">
+            <label>من:</label>
+            <div class="time-input">
+              <input type="number" id="start-hour"   min="0" max="23" placeholder="00"/>
+              <span class="input-note">ساعة</span>
+              <span class="colon">:</span>
+              <input type="number" id="start-minute" min="0" max="59" placeholder="00"/>
+              <span class="input-note">دقيقة</span>
+            </div>
+          </div>
+          <div class="hours-row">
+            <label>إلى:</label>
+            <div class="time-input">
+              <input type="number" id="end-hour"     min="0" max="23" placeholder="00"/>
+              <span class="input-note">ساعة</span>
+              <span class="colon">:</span>
+              <input type="number" id="end-minute"   min="0" max="59" placeholder="00"/>
+              <span class="input-note">دقيقة</span>
+            </div>
+          </div>
+          <!-- هنا أضفنا type="button" -->
+          <button type="button" id="save-hours-btn" class="btn filled primary w-full">💾 حفظ</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: إدخال مبالغ -->
+  <div id="input-modal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-panel">
+      <header class="modal-header">
+        <h3 class="modal-title">
+          <i class="bi bi-pencil-fill"></i>
+          <span id="input-title">أدخل المبلغ:</span>
+        </h3>
+        <button type="button" id="input-cancel" class="btn icon-only"><i class="bi bi-x-lg"></i></button>
+      </header>
+      <div class="modal-body">
+        <input type="number" id="input-value" class="input-number" placeholder="0"/>
+        <div class="modal-actions">
+          <button type="button" id="input-ok" class="btn filled primary w-full">موافق</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: إشعارات -->
+  <div id="notify-modal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-panel">
+      <div class="modal-body">
+        <p id="notify-message" class="modal__info">...</p>
+        <div class="modal-actions">
+          <button type="button" id="notify-ok" class="btn filled primary w-full">حسناً</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

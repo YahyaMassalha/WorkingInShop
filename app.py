@@ -1,11 +1,15 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-from pymongo import MongoClient
 import os
+from flask import Flask, request, jsonify
+from pymongo import MongoClient
 
-app = Flask(__name__)
-CORS(app)
+# تهيئة Flask لخدمة الملفات الثابتة من مجلد static/
+app = Flask(
+    __name__,
+    static_folder="static",    # ← هذا هو اسم المجلد
+    static_url_path=""         # ← لتُخدَم الملفات من مسار الجذر "/"
+)
 
+# إعداد اتصال MongoDB
 MONGO_URI = (
     "mongodb+srv://unknownmasalha1:FvehuNBd3L0DPA4U"
     "@cluster0.nekekvh.mongodb.net/work_tracker"
@@ -16,9 +20,23 @@ db         = client["work_tracker"]
 days_col   = db["work_days"]
 wallet_col = db["wallet"]
 
-# تأكد من وجود وثيقة المحفظة
+# التأكد من وجود وثيقة المحفظة
 if wallet_col.count_documents({"_id": "wallet"}) == 0:
     wallet_col.insert_one({"_id": "wallet", "balance": 0, "salary_adjustment": 0})
+
+# ───────────── خدمة الواجهة الأمامية ────────────────
+
+# عند زيارة "/" نُعيد index.html من مجلد static/
+@app.route("/")
+def index():
+    return app.send_static_file("index.html")
+
+# أي طلب لملف آخر (css، js، صور، إلخ) يُعاد مباشرة من static/
+@app.route("/<path:filename>")
+def static_files(filename):
+    return app.send_static_file(filename)
+
+# ───────────── مسارات الـ API ────────────────
 
 @app.route("/api/get-days", methods=["GET"])
 def get_days():
@@ -31,10 +49,7 @@ def save_day():
     date = data.get("date")
     if not date:
         return jsonify({"error": "Missing date"}), 400
-    update = {}
-    for f in ("start", "end", "salary", "status"):
-        if f in data:
-            update[f] = data[f]
+    update = {k: data[k] for k in ("start","end","salary","status") if k in data}
     days_col.update_one({"date": date}, {"$set": update}, upsert=True)
     return jsonify({"message": "Saved!"}), 200
 
@@ -79,4 +94,4 @@ def receive_salary():
     return jsonify({"received": total}), 200
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)

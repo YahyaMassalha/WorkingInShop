@@ -229,8 +229,15 @@ function renderCalendar() {
 }
 
 // ——— تنقل بين الشهور ———
-prevBtn.onclick   = () => { currentDate.setMonth(M=>M-1); renderCalendar(); };
-nextBtn.onclick   = () => { currentDate.setMonth(M=>M+1); renderCalendar(); };
+prevBtn.onclick = () => {
+  currentDate.setMonth(currentDate.getMonth() - 1);
+  renderCalendar();
+};
+
+nextBtn.onclick = () => {
+  currentDate.setMonth(currentDate.getMonth() + 1);
+  renderCalendar();
+};
 cancelBtn.onclick = () => popup.classList.add("hidden");
 
 // ——— إظهار نموذج ساعات ———

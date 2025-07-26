@@ -2,19 +2,19 @@ import os
 from flask import Flask, request, jsonify
 from pymongo import MongoClient
 
-# تهيئة Flask لخدمة الملفات الثابتة من مجلد static/
+# تهيئة Flask لخدمة ملفات static/ على الجذر
 app = Flask(
     __name__,
-    static_folder="static",    # ← هذا هو اسم المجلد
-    static_url_path=""         # ← لتُخدَم الملفات من مسار الجذر "/"
+    static_folder="static",
+    static_url_path="/static"
 )
 
-# إعداد اتصال MongoDB
-MONGO_URI = (
+# سلسلة الاتصال بقاعدة MongoDB (استخدم متغيّر بيئة في الإنتاج)
+MONGO_URI = os.environ.get("MONGO_URI", (
     "mongodb+srv://unknownmasalha1:FvehuNBd3L0DPA4U"
     "@cluster0.nekekvh.mongodb.net/work_tracker"
     "?retryWrites=true&w=majority&appName=Cluster0"
-)
+))
 client     = MongoClient(MONGO_URI)
 db         = client["work_tracker"]
 days_col   = db["work_days"]
@@ -24,20 +24,14 @@ wallet_col = db["wallet"]
 if wallet_col.count_documents({"_id": "wallet"}) == 0:
     wallet_col.insert_one({"_id": "wallet", "balance": 0, "salary_adjustment": 0})
 
-# ───────────── خدمة الواجهة الأمامية ────────────────
-
-# عند زيارة "/" نُعيد index.html من مجلد static/
+# ───ـ خدمة الواجهة الأمامية ────#
 @app.route("/")
 def index():
     return app.send_static_file("index.html")
 
-# أي طلب لملف آخر (css، js، صور، إلخ) يُعاد مباشرة من static/
-@app.route("/<path:filename>")
-def static_files(filename):
-    return app.send_static_file(filename)
+# ملاحظة: لا نحتاج catch‑all route لأن Flask يخدم /static/* تلقائياً
 
-# ───────────── مسارات الـ API ────────────────
-
+# ─── مسارات الـ API ────#
 @app.route("/api/get-days", methods=["GET"])
 def get_days():
     days = list(days_col.find({}, {"_id": 0}))
@@ -45,7 +39,7 @@ def get_days():
 
 @app.route("/api/save-day", methods=["POST"])
 def save_day():
-    data = request.get_json()
+    data = request.get_json() or {}
     date = data.get("date")
     if not date:
         return jsonify({"error": "Missing date"}), 400

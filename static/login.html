@@ -1,26 +1,36 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>تسجيل الدخول</title>
-  <link rel="stylesheet" href="/static/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet"/>
+  <!-- الآن تكتفي بـ style.css وحيدًا -->
+  <link rel="stylesheet" href="/static/style.css"/>
 </head>
-<body>
+<body class="login-page">
+
   <div class="login-container">
-    <form method="POST" action="/login" class="login-form">
+    <div class="login-header">
       <h2>تسجيل الدخول</h2>
-      <input type="email" name="email" placeholder="البريد الإلكتروني" required>
-      <input type="password" name="password" placeholder="كلمة المرور" required>
-      <button type="submit" class="btn filled primary w-full">دخول</button>
-      <p class="error">
-        <script>
-          if (location.search.includes("error=1")) {
-            document.write("بيانات خاطئة، حاول مرة أخرى");
-          }
-        </script>
-      </p>
+    </div>
+    <form class="login-form" action="/login" method="POST">
+      <div>
+        <label for="email">البريد الإلكتروني</label>
+        <input type="email" id="email" name="email" required placeholder="you@example.com"/>
+      </div>
+      <div>
+        <label for="password">كلمة المرور</label>
+        <input type="password" id="password" name="password" required placeholder="••••••••"/>
+      </div>
+      <button type="submit">دخول</button>
     </form>
+    <div  class="register">
+      <div class="contact-text"><h4>للحصول على حساب تواصل مع المالك</h4></div>
+      <div class="contact-button"><button  onclick="window.open('https://wa.me/972502347770', '_blank')"> تواصل معنا من هنا يا باشا</button></div>
+    </div>
   </div>
+
 </body>
 </html>
